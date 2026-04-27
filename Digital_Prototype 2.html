@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI HEALTH MONITORING SYSTEM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #000000;
+      --muted: #6d6d6d;
+      --line: #cfcfcf;
+      --line-strong: #8f8f8f;
+      --soft: #f5f5f5;
+      --accent: #111111;
+      --ok: #1d1d1d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Chakra Petch", sans-serif;
+      text-transform: uppercase;
+    }
+
+    body {
+      padding: 18px;
+      letter-spacing: 0.03em;
+    }
+
+    .app {
+      width: 100%;
+      min-height: calc(100vh - 36px);
+      border: 1px solid var(--line-strong);
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      background: var(--bg);
+    }
+
+    .topbar,
+    .footerbar {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 18px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .footerbar {
+      border-bottom: 0;
+      border-top: 1px solid var(--line);
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .header {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+      padding: 18px 16px 16px;
+      border-bottom: 1px solid var(--line);
+      align-items: end;
+    }
+
+    .header h1 {
+      font-size: clamp(34px, 5vw, 64px);
+      line-height: 0.9;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      max-width: 10ch;
+    }
+
+    .header-meta {
+      display: grid;
+      gap: 8px;
+      justify-items: end;
+      text-align: right;
+    }
+
+    .status-box {
+      font-size: 14px;
+      font-weight: 700;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      padding: 8px 0;
+      width: 100%;
+    }
+
+    .nav {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .nav button {
+      appearance: none;
+      border: 0;
+      border-right: 1px solid var(--line);
+      background: var(--bg);
+      color: var(--fg);
+      padding: 14px 10px;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: background 120ms ease, color 120ms ease;
+    }
+
+    .nav button:last-child {
+      border-right: 0;
+    }
+
+    .nav button:hover,
+    .nav button:focus-visible {
+      background: var(--soft);
+      outline: none;
+    }
+
+    .nav button.active {
+      background: var(--fg);
+      color: var(--bg);
+    }
+
+    .pages {
+      position: relative;
+      min-height: 0;
+    }
+
+    .page {
+      display: none;
+      min-height: 100%;
+      padding: 16px;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .page-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 1.95fr;
+      gap: 16px;
+      min-height: 100%;
+    }
+
+    .col {
+      display: grid;
+      gap: 16px;
+      min-height: 0;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+      background: var(--bg);
+    }
+
+    .panel-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .big-id {
+      font-size: clamp(26px, 4vw, 42px);
+      font-weight: 700;
+      line-height: 0.95;
+      word-break: break-word;
+    }
+
+    .info-table,
+    .score-table {
+      display: grid;
+      gap: 8px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+      align-items: end;
+    }
+
+    .row:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    .value {
+      font-size: 18px;
+      font-weight: 700;
+      text-align: right;
+      line-height: 1;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      padding: 12px;
+      display: grid;
+      gap: 18px;
+      min-height: 120px;
+      align-content: space-between;
+    }
+
+    .metric-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      line-height: 1.15;
+      letter-spacing: 0.08em;
+    }
+
+    .metric-value {
+      font-size: clamp(24px, 2.7vw, 34px);
+      font-weight: 700;
+      line-height: 0.95;
+    }
+
+    .metric-status {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .summary-item {
+      border: 1px solid var(--line);
+      padding: 12px;
+      display: grid;
+      gap: 12px;
+      min-height: 100px;
+    }
+
+    .summary-item .k {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    .summary-item .v {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 0.95;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .action-btn {
+      appearance: none;
+      border: 1px solid var(--fg);
+      background: var(--bg);
+      color: var(--fg);
+      padding: 16px 12px;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      text-align: left;
+      transition: background 120ms ease, color 120ms ease;
+    }
+
+    .action-btn:hover,
+    .action-btn:focus-visible {
+      background: var(--fg);
+      color: var(--bg);
+      outline: none;
+    }
+
+    .log-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .log-item {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.15;
+    }
+
+    .note {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      line-height: 1.25;
+      letter-spacing: 0.07em;
+    }
+
+    @media (max-width: 1100px) {
+      .page-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .metric-grid,
+      .summary-strip,
+      .actions {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding: 10px;
+      }
+
+      .app {
+        min-height: calc(100vh - 20px);
+      }
+
+      .topbar,
+      .footerbar,
+      .header,
+      .nav,
+      .metric-grid,
+      .summary-strip,
+      .actions {
+        grid-template-columns: 1fr;
+      }
+
+      .header-meta {
+        justify-items: start;
+        text-align: left;
+      }
+
+      .row,
+      .log-item {
+        grid-template-columns: 1fr;
+      }
+
+      .value {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div>AI HEALTH MONITORING SYSTEM</div>
+      <div>CLEARANCE LEVEL 02</div>
+      <div>ZONE B-12</div>
+      <div>TIME 09:38:12</div>
+    </div>
+
+    <div class="header">
+      <h1>SUBJECT HEALTH MONITORING INTERFACE</h1>
+      <div class="header-meta">
+        <div class="status-box">STATUS OPTIMAL</div>
+        <div>SUBJECT ACTIVE</div>
+      </div>
+    </div>
+
+    <div class="nav" role="tablist" aria-label="SECONDARY PAGES">
+      <button class="active" data-page="overview" role="tab" aria-selected="true">OVERVIEW</button>
+      <button data-page="vitals" role="tab" aria-selected="false">VITALS</button>
+      <button data-page="genetics" role="tab" aria-selected="false">GENETICS</button>
+      <button data-page="compliance" role="tab" aria-selected="false">COMPLIANCE</button>
+      <button data-page="actions" role="tab" aria-selected="false">CONTROL</button>
+    </div>
+
+    <div class="pages">
+      <section class="page active" id="overview">
+        <div class="page-grid">
+          <div class="col">
+            <div class="panel">
+              <div class="panel-title">SUBJECT ID</div>
+              <div class="big-id">RL-7781-02-1148</div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">BASIC INFORMATION</div>
+              <div class="info-table">
+                <div class="row"><div class="label">SEX</div><div class="value">FEMALE</div></div>
+                <div class="row"><div class="label">AGE</div><div class="value">21</div></div>
+                <div class="row"><div class="label">HEIGHT</div><div class="value">185 CM</div></div>
+                <div class="row"><div class="label">WEIGHT</div><div class="value">68 KG</div></div>
+                <div class="row"><div class="label">HEALTH STATUS</div><div class="value">QUALIFIED</div></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">REPRODUCTION EVALUATION</div>
+              <div class="score-table">
+                <div class="row"><div class="label">COMPLIANCE SCORE</div><div class="value">99.4</div></div>
+                <div class="row"><div class="label">MATCH INDEX</div><div class="value">96.8</div></div>
+                <div class="row"><div class="label">RISK LEVEL</div><div class="value">LOW</div></div>
+                <div class="row"><div class="label">REPRODUCTION STATUS</div><div class="value">APPROVED</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="panel">
+              <div class="panel-title">SUMMARY METRICS</div>
+              <div class="summary-strip">
+                <div class="summary-item"><div class="k">HEART RATE</div><div class="v">62</div><div class="note">BPM / OPTIMAL</div></div>
+                <div class="summary-item"><div class="k">BLOOD OXYGEN</div><div class="v">99%</div><div class="note">NO DEFICIENCY</div></div>
+                <div class="summary-item"><div class="k">BODY TEMP</div><div class="v">36.8</div><div class="note">CELSIUS / STABLE</div></div>
+                <div class="summary-item"><div class="k">STRESS LEVEL</div><div class="v">LOW</div><div class="note">NO ALERT ACTIVE</div></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">PRIMARY BODY DATA</div>
+              <div class="metric-grid">
+                <div class="metric"><div class="metric-name">BLOOD PRESSURE</div><div class="metric-value">112/72</div><div class="metric-status">STABLE</div></div>
+                <div class="metric"><div class="metric-name">BMI</div><div class="metric-value">19.9</div><div class="metric-status">HEALTHY</div></div>
+                <div class="metric"><div class="metric-name">IMMUNE INDEX</div><div class="metric-value">98.6</div><div class="metric-status">QUALIFIED</div></div>
+                <div class="metric"><div class="metric-name">METABOLIC RATE</div><div class="metric-value">A+</div><div class="metric-status">HIGH</div></div>
+                <div class="metric"><div class="metric-name">REPRODUCTIVE HEALTH</div><div class="metric-value">98.9</div><div class="metric-status">CERTIFIED</div></div>
+                <div class="metric"><div class="metric-name">SYSTEM LOAD</div><div class="metric-value">14%</div><div class="metric-status">NORMAL</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="vitals">
+        <div class="page-grid">
+          <div class="col">
+            <div class="panel">
+              <div class="panel-title">LIVE BODY STATUS</div>
+              <div class="big-id">SUBJECT CONDITION STABLE</div>
+              <div class="note">ALL BIOMETRIC VALUES REMAIN WITHIN PERMITTED SYSTEM LIMITS</div>
+            </div>
+            <div class="panel">
+              <div class="panel-title">CURRENT VALUES</div>
+              <div class="info-table">
+                <div class="row"><div class="label">HEART RATE</div><div class="value">62 BPM</div></div>
+                <div class="row"><div class="label">RESPIRATION</div><div class="value">15 RPM</div></div>
+                <div class="row"><div class="label">TEMPERATURE</div><div class="value">36.8 C</div></div>
+                <div class="row"><div class="label">BLOOD OXYGEN</div><div class="value">99%</div></div>
+                <div class="row"><div class="label">SLEEP QUALITY</div><div class="value">97.2</div></div>
+                <div class="row"><div class="label">HYDRATION</div><div class="value">98.1</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="panel">
+              <div class="panel-title">SECONDARY METRICS</div>
+              <div class="metric-grid">
+                <div class="metric"><div class="metric-name">ENDOCRINE BALANCE</div><div class="metric-value">96.5</div><div class="metric-status">STABLE</div></div>
+                <div class="metric"><div class="metric-name">BONE DENSITY</div><div class="metric-value">95.7</div><div class="metric-status">STRONG</div></div>
+                <div class="metric"><div class="metric-name">MUSCLE EFFICIENCY</div><div class="metric-value">97.1</div><div class="metric-status">QUALIFIED</div></div>
+                <div class="metric"><div class="metric-name">NEURAL RESPONSE</div><div class="metric-value">98.3</div><div class="metric-status">OPTIMAL</div></div>
+                <div class="metric"><div class="metric-name">RECOVERY RATE</div><div class="metric-value">95.9</div><div class="metric-status">FAST</div></div>
+                <div class="metric"><div class="metric-name">DIGESTIVE INDEX</div><div class="metric-value">97.4</div><div class="metric-status">NORMAL</div></div>
+                <div class="metric"><div class="metric-name">VISION SCORE</div><div class="metric-value">99.0</div><div class="metric-status">CLEAR</div></div>
+                <div class="metric"><div class="metric-name">AUDITORY SCORE</div><div class="metric-value">98.8</div><div class="metric-status">CLEAR</div></div>
+                <div class="metric"><div class="metric-name">CARDIAC INDEX</div><div class="metric-value">97.9</div><div class="metric-status">QUALIFIED</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="genetics">
+        <div class="page-grid">
+          <div class="col">
+            <div class="panel">
+              <div class="panel-title">GENETIC STATUS</div>
+              <div class="big-id">GENETIC STABILITY 97.8</div>
+            </div>
+            <div class="panel">
+              <div class="panel-title">PRIMARY RECORD</div>
+              <div class="info-table">
+                <div class="row"><div class="label">SUBJECT CLASS</div><div class="value">CLASS A</div></div>
+                <div class="row"><div class="label">TRAIT RISK</div><div class="value">MINIMAL</div></div>
+                <div class="row"><div class="label">INHERITANCE LOAD</div><div class="value">LOW</div></div>
+                <div class="row"><div class="label">RECOMBINATION INDEX</div><div class="value">95.8</div></div>
+                <div class="row"><div class="label">OFFSPRING VIABILITY</div><div class="value">HIGH</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="panel">
+              <div class="panel-title">GENETIC ANALYSIS</div>
+              <div class="metric-grid">
+                <div class="metric"><div class="metric-name">CHROMOSOME BALANCE</div><div class="metric-value">98.1</div><div class="metric-status">STABLE</div></div>
+                <div class="metric"><div class="metric-name">MUTATION RISK</div><div class="metric-value">0.4%</div><div class="metric-status">LOW</div></div>
+                <div class="metric"><div class="metric-name">CELLULAR INTEGRITY</div><div class="metric-value">97.6</div><div class="metric-status">QUALIFIED</div></div>
+                <div class="metric"><div class="metric-name">HEREDITARY LOAD</div><div class="metric-value">LOW</div><div class="metric-status">PASS</div></div>
+                <div class="metric"><div class="metric-name">MATCH COMPATIBILITY</div><div class="metric-value">96.8</div><div class="metric-status">OPTIMAL</div></div>
+                <div class="metric"><div class="metric-name">BIRTH RISK</div><div class="metric-value">LOW</div><div class="metric-status">MONITORED</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="compliance">
+        <div class="page-grid">
+          <div class="col">
+            <div class="panel">
+              <div class="panel-title">COMPLIANCE STATUS</div>
+              <div class="big-id">COMPLIANCE CONFIRMED</div>
+            </div>
+            <div class="panel">
+              <div class="panel-title">SYSTEM SCORES</div>
+              <div class="info-table">
+                <div class="row"><div class="label">TOTAL SCORE</div><div class="value">99.4</div></div>
+                <div class="row"><div class="label">MOVEMENT INDEX</div><div class="value">98.8</div></div>
+                <div class="row"><div class="label">LANGUAGE INDEX</div><div class="value">99.1</div></div>
+                <div class="row"><div class="label">EMOTION INDEX</div><div class="value">97.9</div></div>
+                <div class="row"><div class="label">DEVIATION RATE</div><div class="value">0.02%</div></div>
+                <div class="row"><div class="label">RISK LEVEL</div><div class="value">LOW</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="panel">
+              <div class="panel-title">RECENT LOGS</div>
+              <div class="log-list">
+                <div class="log-item"><div>09:14:02</div><div>POSTURE ALIGNMENT VERIFIED / NO CORRECTION REQUIRED</div></div>
+                <div class="log-item"><div>08:52:18</div><div>LANGUAGE OUTPUT VERIFIED / NO DEVIATION DETECTED</div></div>
+                <div class="log-item"><div>08:10:44</div><div>NUTRITION CYCLE COMPLETED / SYSTEM RESPONSE NORMAL</div></div>
+                <div class="log-item"><div>07:58:03</div><div>HEALTH SCAN CONFIRMED / ALL VALUES WITHIN LIMITS</div></div>
+                <div class="log-item"><div>07:12:39</div><div>MOBILITY TRACK VERIFIED / PATH EXECUTED CORRECTLY</div></div>
+                <div class="log-item"><div>06:59:11</div><div>SLEEP CYCLE CLOSED / RECOVERY RATE ABOVE TARGET</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="actions">
+        <div class="page-grid">
+          <div class="col">
+            <div class="panel">
+              <div class="panel-title">SYSTEM CONTROL</div>
+              <div class="big-id">AUTHORIZED FUNCTIONS</div>
+              <div class="note">SELECT A CONTROL ACTION TO UPDATE SUBJECT STATUS IN REAL TIME</div>
+            </div>
+            <div class="panel">
+              <div class="panel-title">ACTION BUTTONS</div>
+              <div class="actions">
+                <button class="action-btn" data-action="SCAN CONFIRMED">RUN FULL SCAN</button>
+                <button class="action-btn" data-action="STATUS REFRESHED">REFRESH STATUS</button>
+                <button class="action-btn" data-action="REPORT GENERATED">GENERATE REPORT</button>
+                <button class="action-btn" data-action="MATCH UPDATED">UPDATE MATCH</button>
+                <button class="action-btn" data-action="ACCESS VERIFIED">VERIFY ACCESS</button>
+                <button class="action-btn" data-action="RISK EVALUATED">RUN RISK CHECK</button>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="panel">
+              <div class="panel-title">INTERACTION OUTPUT</div>
+              <div class="info-table">
+                <div class="row"><div class="label">LAST ACTION</div><div class="value" id="lastAction">NO ACTION</div></div>
+                <div class="row"><div class="label">OUTPUT STATUS</div><div class="value" id="outputStatus">STANDBY</div></div>
+                <div class="row"><div class="label">CONTROL LEVEL</div><div class="value">AUTHORIZED</div></div>
+                <div class="row"><div class="label">RESPONSE TIME</div><div class="value" id="responseTime">00.00 S</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="footerbar">
+      <div>SUBJECT VERIFIED</div>
+      <div>NO ACTIVE WARNING</div>
+      <div>DECISION ENGINE STABLE</div>
+      <div>AI SYSTEM ONLINE</div>
+    </div>
+  </div>
+
+  <script>
+    const tabs = document.querySelectorAll('.nav button');
+    const pages = document.querySelectorAll('.page');
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const target = tab.dataset.page;
+
+        tabs.forEach((btn) => {
+          btn.classList.remove('active');
+          btn.setAttribute('aria-selected', 'false');
+        });
+
+        pages.forEach((page) => page.classList.remove('active'));
+
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        document.getElementById(target).classList.add('active');
+      });
+    });
+
+    const actionButtons = document.querySelectorAll('.action-btn');
+    const lastAction = document.getElementById('lastAction');
+    const outputStatus = document.getElementById('outputStatus');
+    const responseTime = document.getElementById('responseTime');
+
+    actionButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        lastAction.textContent = button.dataset.action;
+        outputStatus.textContent = 'COMPLETED';
+        responseTime.textContent = (Math.random() * 0.9 + 0.1).toFixed(2) + ' S';
+      });
+    });
+  </script>
+</body>
+</html>
